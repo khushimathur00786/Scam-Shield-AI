@@ -5,7 +5,7 @@ import { Footer } from '../components/layout/Footer';
 import { Button } from '../components/ui/Button';
 import { Spinner } from '../components/ui/Spinner';
 import { ScanResult } from '../components/analysis/ScanResult';
-import { analyzeContent } from '../api/analyze';
+import { analyzeContent, analyzeOfferLetterFile } from '../api/analyze';
 import type { ScanResult as ScanResultType } from '../types';
 
 type InputTab = 'job_post' | 'chat' | 'offer_letter';
@@ -53,14 +53,22 @@ export function AnalyzeSection({ onViewSafety, onReport }: AnalyzeSectionProps) 
     setLoadingMsg(0);
     setError(null);
 
-    const text =
-      activeTab === 'job_post'
-        ? jobPostText
-        : activeTab === 'chat'
-          ? chatText
-          : uploadedFile?.name ?? '';
-
     try {
+      // ── Offer letter: upload the actual file for text extraction ──
+      if (activeTab === 'offer_letter') {
+        if (!uploadedFile) {
+          setError('Please upload an offer letter file first.');
+          setIsLoading(false);
+          return;
+        }
+        const scanResult = await analyzeOfferLetterFile(uploadedFile, companyName || undefined);
+        setResult(scanResult);
+        return;
+      }
+
+      // ── Job post / chat: send text directly ───────────────────────
+      const text = activeTab === 'job_post' ? jobPostText : chatText;
+
       const scanResult = await analyzeContent({
         inputType: activeTab,
         text,
@@ -185,7 +193,7 @@ export function AnalyzeSection({ onViewSafety, onReport }: AnalyzeSectionProps) 
       )}
 
       {activeTab === 'offer_letter' && (
-        <div>
+        <div className="space-y-4">
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
@@ -210,6 +218,13 @@ export function AnalyzeSection({ onViewSafety, onReport }: AnalyzeSectionProps) 
             accept=".pdf,.jpg,.jpeg,.png"
             className="hidden"
             onChange={(e) => setUploadedFile(e.target.files?.[0] ?? null)}
+          />
+          <input
+            type="text"
+            className={inputClass}
+            placeholder="Company Name (optional — helps with verification)"
+            value={companyName}
+            onChange={(e) => setCompanyName(e.target.value)}
           />
         </div>
       )}

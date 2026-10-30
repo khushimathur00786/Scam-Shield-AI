@@ -6,6 +6,7 @@ import { rateLimit } from 'express-rate-limit';
 import { errorHandler } from './middleware/errorHandler';
 import { sanitizeBody } from './middleware/sanitize';
 import analyzeRouter from './routes/analyze';
+import analyzeFileRouter from './routes/analyzeFile';
 import verifyRouter from './routes/verify';
 import reportRouter from './routes/report';
 import dashboardRouter from './routes/dashboard';
@@ -67,6 +68,7 @@ app.get('/api/health', (_req, res) => {
 
 // ── Routes ─────────────────────────────────────────────────────────
 app.use('/api/analyze', analyzeLimiter, analyzeRouter);
+app.use('/api/analyze', analyzeLimiter, analyzeFileRouter);
 app.use('/api/verify', verifyRouter);
 app.use('/api/report', reportRouter);
 app.use('/api/reports', reportRouter);

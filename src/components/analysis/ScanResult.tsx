@@ -81,14 +81,15 @@ export function ScanResult({ result, onAnalyzeAnother, onViewSafety, onReport }:
 
   return (
     <div className="space-y-6">
-      {/* Demo disclaimer */}
-      <div className="flex items-start gap-2 bg-caution/10 border border-caution/30 rounded-xl px-4 py-3 text-caution text-sm">
-        <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
-        <span>
-          <strong>Demo Data —</strong> These results are simulated for demonstration purposes only
-          and do not represent real AI analysis or actual verification.
-        </span>
-      </div>
+      {/* Real analysis notice */}
+      {result.isDemo && (
+        <div className="flex items-start gap-2 bg-caution/10 border border-caution/30 rounded-xl px-4 py-3 text-caution text-sm">
+          <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+          <span>
+            <strong>Demo Mode —</strong> Connect the backend to see real AI-powered analysis results.
+          </span>
+        </div>
+      )}
 
       {/* Risk classification hero */}
       <div
