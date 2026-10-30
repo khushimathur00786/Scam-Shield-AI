@@ -3,7 +3,7 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://scamshield-backend-zn0o.onrender.com/api/$1" },
+    { "source": "/api/(.*)", "destination": "https://scam-shield-ai-7zrz.onrender.com/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
