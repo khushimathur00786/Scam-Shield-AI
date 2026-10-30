@@ -6,8 +6,8 @@
 ---
 
 ## 🚀 Live Demo
-- Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:3001`
+- Frontend: ` https://scam-shield-ai-fawn.vercel.app`
+- Backend API: ` https://scam-shield-ai-7zrz.onrender.com`
 - Database: MongoDB Atlas (cloud)
 
 ---
@@ -72,7 +72,7 @@ npm install
 Create `backend/.env`:
 ```env
 PORT=3001
-FRONTEND_URL=http://localhost:5173
+FRONTEND_URL= https://scam-shield-ai-fawn.vercel.app
 MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/scamshield?retryWrites=true&w=majority
 ```
 
@@ -88,7 +88,7 @@ cd ..
 npm run dev
 ```
 
-Open: **http://localhost:5173**
+Open: **https://scam-shield-ai-fawn.vercel.app**
 
 ---
 
