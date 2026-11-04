@@ -56,6 +56,11 @@ export function AnalyzeSection({ onViewSafety, onReport }: AnalyzeSectionProps) 
     return () => clearInterval(interval);
   }, [isLoading]);
 
+  // Ping backend on mount so Render wakes up before user uploads
+  useEffect(() => {
+    fetch('/api/health').catch(() => { /* silent — just warming up */ });
+  }, []);
+
   const handleAnalyze = async () => {
     setIsLoading(true);
     setLoadingMsg(0);
@@ -95,13 +100,20 @@ export function AnalyzeSection({ onViewSafety, onReport }: AnalyzeSectionProps) 
         }, 400);
 
         try {
-          // Call backend to extract text only (we'll reuse analyzeOfferLetterFile
-          // but intercept — actually extract via the file upload endpoint)
           const formData = new FormData();
           formData.append('file', uploadedFile);
           if (companyName) formData.append('companyName', companyName);
 
-          const res = await fetch('/api/analyze/file', { method: 'POST', body: formData });
+          // Use a 60 second timeout — Render free tier may take 30-50s to wake up
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 60000);
+
+          const res = await fetch('/api/analyze/file', {
+            method: 'POST',
+            body: formData,
+            signal: controller.signal,
+          });
+          clearTimeout(timeout);
           clearInterval(progressInterval);
           setExtractionProgress(100);
 
@@ -124,7 +136,13 @@ export function AnalyzeSection({ onViewSafety, onReport }: AnalyzeSectionProps) 
         } catch (err) {
           clearInterval(progressInterval);
           setExtractionState('idle');
-          setError(err instanceof Error ? err.message : 'Extraction failed. Please try again.');
+          if (err instanceof Error && err.name === 'AbortError') {
+            setError('Request timed out. The server may be waking up — please wait 30 seconds and try again.');
+          } else if (err instanceof Error && err.message.toLowerCase().includes('fetch')) {
+            setError('Connection failed. Please check your internet and try again. If the problem persists, the server may be starting up — wait 30 seconds and retry.');
+          } else {
+            setError(err instanceof Error ? err.message : 'Extraction failed. Please try again.');
+          }
         }
         return;
       }
