@@ -6,9 +6,9 @@
 ---
 
 ## 🚀 Live Demo
-- Frontend: ` https://scam-shield-ai-fawn.vercel.app`
-- Backend API: ` https://scam-shield-ai-7zrz.onrender.com`
-- Database: MongoDB Atlas (cloud)
+- Frontend: https://scam-shield-ai-tan.vercel.app
+- Backend API: https://scam-shield-ai-7zrz.onrender.com
+- GitHub: https://github.com/khushimathur00786/Scam-Shield-AI
 
 ---
 
