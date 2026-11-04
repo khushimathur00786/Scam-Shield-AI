@@ -72,7 +72,7 @@ npm install
 Create `backend/.env`:
 ```env
 PORT=3001
-FRONTEND_URL= https://scam-shield-ai-fawn.vercel.app
+FRONTEND_URL=  https://scam-shield-ai-tan.vercel.app
 MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/scamshield?retryWrites=true&w=majority
 ```
 
