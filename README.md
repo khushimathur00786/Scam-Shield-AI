@@ -88,7 +88,7 @@ cd ..
 npm run dev
 ```
 
-Open: **https://scam-shield-ai-fawn.vercel.app**
+Open: **https://scam-shield-ai-tan.vercel.app**
 
 ---
 
