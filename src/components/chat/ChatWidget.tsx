@@ -500,22 +500,28 @@ export function ChatWidget() {
                     className="flex-1 bg-transparent text-sm text-[#F8FAFC] placeholder:text-[#4B5563] focus:outline-none disabled:opacity-50 min-w-0"
                   />
 
-                  {/* Mic button */}
-                  {voiceSupported && (
-                    <button
-                      onClick={isRecording ? stopRecording : startRecording}
-                      disabled={loading}
-                      aria-label={isRecording ? 'Stop recording' : 'Start voice input'}
-                      title={isRecording ? 'Stop recording' : 'Voice input'}
-                      className={`p-1.5 rounded-lg transition-all ${
-                        isRecording
-                          ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30 animate-pulse'
-                          : 'text-[#9CA3AF] hover:text-amber-400 hover:bg-amber-500/10'
-                      }`}
-                    >
-                      {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                    </button>
-                  )}
+                  {/* Mic button — always show, with fallback message for unsupported browsers */}
+                  <button
+                    onClick={
+                      !voiceSupported
+                        ? () => setMicError('Voice input requires Chrome or Edge browser.')
+                        : isRecording
+                        ? stopRecording
+                        : startRecording
+                    }
+                    disabled={loading}
+                    aria-label={isRecording ? 'Stop recording' : 'Start voice input'}
+                    title={!voiceSupported ? 'Voice input requires Chrome or Edge' : isRecording ? 'Stop recording' : 'Voice input'}
+                    className={`p-1.5 rounded-lg transition-all ${
+                      isRecording
+                        ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30 animate-pulse'
+                        : !voiceSupported
+                        ? 'text-[#4B5563] cursor-not-allowed'
+                        : 'text-[#9CA3AF] hover:text-amber-400 hover:bg-amber-500/10'
+                    }`}
+                  >
+                    {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                  </button>
 
                   {/* Send button */}
                   <button
