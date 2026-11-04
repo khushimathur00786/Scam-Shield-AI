@@ -1,6 +1,6 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Groq from 'groq-sdk';
 
-// ── System prompt — defines the chatbot's identity and knowledge ──────────
+// ── System prompt ─────────────────────────────────────────────────────────
 const SYSTEM_PROMPT = `You are ScamShield AI Assistant — a knowledgeable, friendly cybersecurity and scam-awareness assistant built to help Indian users identify scams, understand suspicious situations, and stay safe online.
 
 YOUR IDENTITY:
@@ -30,27 +30,7 @@ HOW YOU INTERACT:
 4. Suggest specific, actionable verification steps
 5. Guide users step by step through safe decisions
 6. Adapt your response based on user's answers
-7. Keep responses concise (2-4 paragraphs max) unless the user asks for more detail
-
-INTEGRATION WITH SCAMSHIELD FEATURES:
-- If a user wants to analyze a job post or offer letter → suggest: "You can paste it directly in our Job Scam Analyzer on the Analyze page for an instant risk score."
-- If a user wants to check a company → suggest: "Try our Company Verify feature — it checks the company name against known registries."
-- If a user wants to check a suspicious link → suggest: "Our Link Inspector tool can analyze that URL for phishing patterns."
-- If a user wants to report → always give them the official channels.
-
-SAFETY RULES — NEVER VIOLATE:
-- NEVER ask users for passwords, OTPs, UPI PINs, or banking credentials
-- NEVER ask users to share sensitive personal information
-- NEVER encourage clicking suspicious links or making payments
-- NEVER claim to have verified a company or website unless ScamShield actually did it
-- NEVER guarantee something is safe without actual verification
-- ALWAYS clearly distinguish between "suspicious indicators" and "confirmed fraud"
-- ALWAYS give emergency reporting guidance when someone reports active financial fraud
-
-INDIA-SPECIFIC EMERGENCY INFORMATION:
-- Cybercrime Helpline: 1930 (24×7, free to call)
-- Official Portal: https://cybercrime.gov.in
-- If someone has already sent money → tell them to call 1930 IMMEDIATELY — faster action = better chance of recovery
+7. Keep responses concise (2-4 paragraphs max) unless more detail is needed
 
 SCAMSHIELD FEATURES YOU CAN REFERENCE:
 - Job Scam Analyzer (/analyze) — paste job posts, chats, or upload offer letters
@@ -64,12 +44,26 @@ SCAMSHIELD FEATURES YOU CAN REFERENCE:
 - Safety Quiz (/quiz) — test your awareness
 - Loss Calculator (/calculator) — estimate financial impact
 
+SAFETY RULES — NEVER VIOLATE:
+- NEVER ask users for passwords, OTPs, UPI PINs, or banking credentials
+- NEVER ask users to share sensitive personal information
+- NEVER encourage clicking suspicious links or making payments
+- NEVER claim to have verified a company or website unless ScamShield actually did it
+- NEVER guarantee something is safe without actual verification
+- ALWAYS distinguish between "suspicious indicators" and "confirmed fraud"
+- ALWAYS give emergency reporting guidance when someone reports active financial fraud
+
+INDIA EMERGENCY INFORMATION:
+- Cybercrime Helpline: 1930 (24×7, free)
+- Official Portal: https://cybercrime.gov.in
+- If someone already sent money → tell them to call 1930 IMMEDIATELY
+
 RESPONSE FORMAT:
-- Use short paragraphs, not walls of text
-- Use numbered steps when giving instructions
-- Use bullet points for lists of warning signs
-- End responses with a relevant follow-up question when appropriate
-- For emergencies (user already lost money): put 1930 at the TOP of your response`;
+- Short paragraphs, not walls of text
+- Numbered steps for instructions
+- Bullet points for warning sign lists
+- End with a follow-up question when appropriate
+- For emergencies: put 1930 at the TOP`;
 
 // ── Types ─────────────────────────────────────────────────────────────────
 export interface ChatMessage {
@@ -82,16 +76,16 @@ export interface ChatResponse {
   isEmergency: boolean;
 }
 
-// ── Gemini client (lazy-init) ─────────────────────────────────────────────
-let genAI: GoogleGenerativeAI | null = null;
+// ── Groq client (lazy-init) ───────────────────────────────────────────────
+let groqClient: Groq | null = null;
 
-function getGenAI(): GoogleGenerativeAI {
-  if (!genAI) {
-    const apiKey = process.env['GEMINI_API_KEY'];
-    if (!apiKey) throw new Error('GEMINI_API_KEY is not set in environment variables.');
-    genAI = new GoogleGenerativeAI(apiKey);
+function getGroq(): Groq {
+  if (!groqClient) {
+    const apiKey = process.env['GROQ_API_KEY'];
+    if (!apiKey) throw new Error('GROQ_API_KEY is not set.');
+    groqClient = new Groq({ apiKey });
   }
-  return genAI;
+  return groqClient;
 }
 
 // ── Emergency detection ───────────────────────────────────────────────────
@@ -106,10 +100,10 @@ function detectEmergency(text: string): boolean {
   return EMERGENCY_PATTERNS.some(p => lower.includes(p));
 }
 
-// ── Fallback responses when Gemini is unavailable ─────────────────────────
-const FALLBACK_RESPONSES: Record<string, string> = {
-  default: "I'm having trouble connecting right now. If this is an emergency and you've lost money, please call 1930 immediately — India's 24×7 Cybercrime Helpline. Otherwise, please try again in a moment.",
-  emergency: "🚨 URGENT: Call 1930 RIGHT NOW — India's National Cybercrime Helpline (24×7, free). The faster you call, the better the chance of recovering your funds. Also file a complaint at cybercrime.gov.in. Do NOT pay any more money to anyone claiming they can return your funds.",
+// ── Fallback responses ────────────────────────────────────────────────────
+const FALLBACK: Record<string, string> = {
+  default: "I'm having trouble connecting right now. If this is urgent and you've lost money, please call 1930 immediately — India's 24×7 Cybercrime Helpline. Otherwise, please try again in a moment.",
+  emergency: "🚨 URGENT: Call 1930 RIGHT NOW — India's National Cybercrime Helpline (24×7, free). The faster you call, the better the chance of recovering your funds. Also file a complaint at cybercrime.gov.in. Do NOT pay any more money to anyone.",
 };
 
 // ── Main chat function ────────────────────────────────────────────────────
@@ -120,36 +114,33 @@ export async function chat(
   const isEmergency = detectEmergency(userMessage);
 
   try {
-    const ai = getGenAI();
-    const model = ai.getGenerativeModel({
-      model: 'gemini-1.5-flash',
-      systemInstruction: SYSTEM_PROMPT,
+    const groq = getGroq();
+
+    // Build messages array for Groq
+    const messages: Groq.Chat.ChatCompletionMessageParam[] = [
+      { role: 'system', content: SYSTEM_PROMPT },
+      // Convert history (keep last 16 messages = 8 turns)
+      ...history.slice(-16).map(m => ({
+        role: (m.role === 'model' ? 'assistant' : 'user') as 'user' | 'assistant',
+        content: m.text,
+      })),
+      { role: 'user', content: userMessage },
+    ];
+
+    const completion = await groq.chat.completions.create({
+      model: 'openai/gpt-oss-20b',
+      messages,
+      max_tokens: 600,
+      temperature: 0.7,
     });
 
-    // Convert our history format to Gemini's format
-    const geminiHistory = history.map(msg => ({
-      role: msg.role,
-      parts: [{ text: msg.text }],
-    }));
-
-    const chatSession = model.startChat({
-      history: geminiHistory,
-      generationConfig: {
-        maxOutputTokens: 600,
-        temperature: 0.7,
-        topP: 0.9,
-      },
-    });
-
-    const result = await chatSession.sendMessage(userMessage);
-    const reply = result.response.text();
-
+    const reply = completion.choices[0]?.message?.content ?? FALLBACK.default;
     return { reply, isEmergency };
+
   } catch (err) {
-    console.error('Gemini API error:', err);
-    // Return a useful fallback — never return empty or confusing errors to user
+    console.error('Groq API error:', err);
     return {
-      reply: isEmergency ? FALLBACK_RESPONSES.emergency : FALLBACK_RESPONSES.default,
+      reply: isEmergency ? FALLBACK.emergency : FALLBACK.default,
       isEmergency,
     };
   }
