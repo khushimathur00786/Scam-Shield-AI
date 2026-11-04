@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button';
 import { Spinner } from '../components/ui/Spinner';
 import { ScanResult } from '../components/analysis/ScanResult';
 import { analyzeContent } from '../api/analyze';
+import { extractTextClientSide } from '../services/extractClient';
 import type { ScanResult as ScanResultType } from '../types';
 
 type InputTab = 'job_post' | 'chat' | 'offer_letter';
@@ -92,57 +93,80 @@ export function AnalyzeSection({ onViewSafety, onReport }: AnalyzeSectionProps) 
         setExtractionProgress(0);
         setIsLoading(false);
 
-        const progressInterval = setInterval(() => {
-          setExtractionProgress(prev => {
-            if (prev >= 90) { clearInterval(progressInterval); return 90; }
-            return prev + Math.floor(Math.random() * 15) + 5;
-          });
-        }, 400);
-
         try {
-          const formData = new FormData();
-          formData.append('file', uploadedFile);
-          if (companyName) formData.append('companyName', companyName);
+          let extractedContent = '';
 
-          // Use a 60 second timeout — Render free tier may take 30-50s to wake up
-          const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 60000);
-
-          const res = await fetch('/api/analyze/file', {
-            method: 'POST',
-            body: formData,
-            signal: controller.signal,
-          });
-          clearTimeout(timeout);
-          clearInterval(progressInterval);
-          setExtractionProgress(100);
-
-          if (!res.ok) {
-            const body = await res.json().catch(() => ({})) as { error?: string };
-            setExtractionState('idle');
-            setError(body.error ?? 'Text extraction failed. Please try a clearer image or PDF.');
-            return;
+          // ── Images → client-side OCR (no backend needed, works on mobile) ──
+          if (uploadedFile.type.startsWith('image/')) {
+            const result = await extractTextClientSide(uploadedFile, (pct) => {
+              setExtractionProgress(pct);
+            });
+            if (result.method === 'failed' || !result.text) {
+              setExtractionState('idle');
+              setError(result.error ?? 'Could not extract text from this image.');
+              return;
+            }
+            extractedContent = result.text;
+          }
+          // ── PDF → backend extraction ──────────────────────────────────────
+          else if (uploadedFile.type === 'application/pdf') {
+            const progressInterval = setInterval(() => {
+              setExtractionProgress(prev => prev >= 85 ? 85 : prev + 10);
+            }, 400);
+            try {
+              const formData = new FormData();
+              formData.append('file', uploadedFile);
+              if (companyName) formData.append('companyName', companyName);
+              const controller = new AbortController();
+              const timeout = setTimeout(() => controller.abort(), 60000);
+              const res = await fetch('/api/analyze/file', {
+                method: 'POST', body: formData, signal: controller.signal,
+              });
+              clearTimeout(timeout);
+              clearInterval(progressInterval);
+              setExtractionProgress(100);
+              if (!res.ok) {
+                const body = await res.json().catch(() => ({})) as { error?: string };
+                setExtractionState('idle');
+                setError(body.error ?? 'PDF extraction failed. Please try again.');
+                return;
+              }
+              // Backend returns full scan result for PDF
+              const scanResult = await res.json() as ScanResultType & { extractedTextLength?: number };
+              setExtractionState('done');
+              setExtractedText(`Extracted ${scanResult.extractedTextLength ?? '?'} characters from PDF.`);
+              setResult(scanResult);
+              return;
+            } catch (err) {
+              clearInterval(progressInterval);
+              setExtractionState('idle');
+              if (err instanceof Error && err.name === 'AbortError') {
+                setError('PDF processing timed out. Please try again or use an image instead.');
+              } else {
+                setError('PDF extraction failed. Please try uploading a JPG/PNG image instead.');
+              }
+              return;
+            }
           }
 
-          const scanResult = await res.json() as ScanResultType & { extractedTextLength?: number };
-          clearInterval(progressInterval);
           setExtractionProgress(100);
-
-          // Show extracted text preview before displaying result
-          // We'll show the result directly since backend already analyzed
+          // Show preview of extracted text
+          setExtractedText(extractedContent);
           setExtractionState('done');
-          setExtractedText(`Extracted ${scanResult.extractedTextLength ?? '?'} characters from document.`);
+
+          // Analyze extracted text via backend analyze endpoint
+          setIsLoading(true);
+          const scanResult = await analyzeContent({
+            inputType: 'offer_letter',
+            text: extractedContent,
+            companyName: companyName || undefined,
+          });
           setResult(scanResult);
         } catch (err) {
-          clearInterval(progressInterval);
           setExtractionState('idle');
-          if (err instanceof Error && err.name === 'AbortError') {
-            setError('Request timed out. The server may be waking up — please wait 30 seconds and try again.');
-          } else if (err instanceof Error && err.message.toLowerCase().includes('fetch')) {
-            setError('Connection failed. Please check your internet and try again. If the problem persists, the server may be starting up — wait 30 seconds and retry.');
-          } else {
-            setError(err instanceof Error ? err.message : 'Extraction failed. Please try again.');
-          }
+          setError(err instanceof Error ? err.message : 'Extraction failed. Please try again.');
+        } finally {
+          setIsLoading(false);
         }
         return;
       }
