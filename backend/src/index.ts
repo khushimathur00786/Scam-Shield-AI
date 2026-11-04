@@ -16,6 +16,7 @@ import linksRouter from './routes/links';
 import evidenceRouter from './routes/evidence';
 import radarRouter from './routes/radar';
 import coachRouter from './routes/coach';
+import chatRouter from './routes/chat';
 import { connectDB } from './db/connect';
 
 dotenv.config();
@@ -79,6 +80,7 @@ app.use('/api/links', linksRouter);
 app.use('/api/evidence', evidenceRouter);
 app.use('/api/radar', radarRouter);
 app.use('/api/coach', coachRouter);
+app.use('/api/chat', chatRouter);
 
 // ── Global error handler ───────────────────────────────────────────
 app.use(errorHandler);

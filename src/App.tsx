@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ToastProvider } from './context/ToastContext';
 import { Toast } from './components/ui/Toast';
+import { ChatWidget } from './components/chat/ChatWidget';
 import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
 import AnalyzePage from './pages/AnalyzePage';
@@ -22,6 +23,7 @@ export default function App() {
   return (
     <ToastProvider>
       <Toast />
+      <ChatWidget />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
