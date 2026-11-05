@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import {
-  Bot, X, Minimize2, Send, Mic, MicOff, Volume2, VolumeX,
-  Phone, Trash2, ChevronDown, ShieldCheck,
+  X, Minimize2, Send, Mic, MicOff, Volume2, VolumeX,
+  Phone, Trash2, ChevronDown, ShieldCheck, Sparkles,
 } from 'lucide-react';
 import { sendChatMessage, type ChatMessage } from '../../api/chat';
 
@@ -15,29 +15,27 @@ interface DisplayMessage {
 
 // ── Suggested prompts ─────────────────────────────────────────────────────
 const SUGGESTED_PROMPTS = [
-  'Is this job offer genuine?',
-  'How do I identify a task scam?',
-  'Someone is asking me for money. What should I do?',
-  'How do I report online fraud?',
-  'How can I verify a company?',
+  '🔍 Is this job offer genuine?',
+  '⚠️ How do I identify a task scam?',
+  '💸 Someone is asking me for money',
+  '📋 How do I report online fraud?',
+  '🏢 How can I verify a company?',
 ];
 
 // ── Welcome message ───────────────────────────────────────────────────────
 const WELCOME: DisplayMessage = {
   role: 'assistant',
-  text: "Hello! I'm your ScamShield AI Assistant. I can help you identify suspicious activities, understand online scams, and stay safe in the digital world. You can type or simply talk to me. How can I help you today?",
+  text: "Hey there! 👋 I'm Shieldy — your ScamShield AI buddy!\n\nI'm here to help you stay safe from online scams, fake jobs, and cyber fraud. You can type or talk to me 🎙️\n\nHow can I help you today?",
   timestamp: Date.now(),
 };
 
-// ── Speech Recognition type augment ──────────────────────────────────────
+// ── Speech Recognition types ──────────────────────────────────────────────
 interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList;
 }
-
 interface SpeechRecognitionErrorEvent extends Event {
   error: string;
 }
-
 interface SpeechRecognitionInstance extends EventTarget {
   lang: string;
   continuous: boolean;
@@ -50,11 +48,7 @@ interface SpeechRecognitionInstance extends EventTarget {
   start: () => void;
   stop: () => void;
 }
-
-interface SpeechRecognitionConstructor {
-  new(): SpeechRecognitionInstance;
-}
-
+interface SpeechRecognitionConstructor { new(): SpeechRecognitionInstance; }
 declare global {
   interface Window {
     SpeechRecognition: SpeechRecognitionConstructor;
@@ -62,9 +56,89 @@ declare global {
   }
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────
 function formatTime(ts: number): string {
   return new Date(ts).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+}
+
+// ── Cute AI Avatar SVG ────────────────────────────────────────────────────
+function BotAvatar({ size = 32, animate = false }: { size?: number; animate?: boolean }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 64 64"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={animate ? 'animate-bounce' : ''}
+      style={animate ? { animationDuration: '2s' } : {}}
+    >
+      {/* Body */}
+      <rect x="12" y="20" width="40" height="32" rx="12" fill="#F59E0B" />
+      {/* Head */}
+      <rect x="16" y="8" width="32" height="26" rx="10" fill="#FBBF24" />
+      {/* Antenna */}
+      <line x1="32" y1="8" x2="32" y2="2" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" />
+      <circle cx="32" cy="2" r="2.5" fill="#F59E0B" />
+      {/* Eyes */}
+      <circle cx="24" cy="19" r="4" fill="white" />
+      <circle cx="40" cy="19" r="4" fill="white" />
+      <circle cx="25" cy="20" r="2" fill="#111318" />
+      <circle cx="41" cy="20" r="2" fill="#111318" />
+      {/* Eye shine */}
+      <circle cx="26" cy="19" r="0.8" fill="white" />
+      <circle cx="42" cy="19" r="0.8" fill="white" />
+      {/* Smile */}
+      <path d="M24 27 Q32 33 40 27" stroke="#111318" strokeWidth="2" strokeLinecap="round" fill="none" />
+      {/* Cheeks */}
+      <circle cx="20" cy="26" r="3" fill="#FDE68A" opacity="0.6" />
+      <circle cx="44" cy="26" r="3" fill="#FDE68A" opacity="0.6" />
+      {/* Arms */}
+      <rect x="4" y="24" width="10" height="6" rx="3" fill="#FBBF24" />
+      <rect x="50" y="24" width="10" height="6" rx="3" fill="#FBBF24" />
+      {/* Belly screen */}
+      <rect x="20" y="34" width="24" height="12" rx="6" fill="#111318" opacity="0.2" />
+      <circle cx="28" cy="40" r="2" fill="#34D399" />
+      <circle cx="32" cy="40" r="2" fill="#F59E0B" />
+      <circle cx="36" cy="40" r="2" fill="#F87171" />
+    </svg>
+  );
+}
+
+// ── Floating trigger with speech bubble ───────────────────────────────────
+function FloatingTrigger({ onClick, unreadCount, showBubble }: {
+  onClick: () => void;
+  unreadCount: number;
+  showBubble: boolean;
+}) {
+  return (
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+      {/* Speech bubble */}
+      {showBubble && (
+        <div className="bg-[#20232B] border border-amber-500/30 rounded-2xl rounded-br-sm px-4 py-2.5 shadow-lg max-w-[200px] animate-fade-in-up">
+          <p className="text-xs text-[#F8FAFC] font-medium">Hi! 👋 I'm Shieldy</p>
+          <p className="text-[10px] text-[#9CA3AF] mt-0.5">Ask me about scams!</p>
+          {/* Arrow */}
+          <div className="absolute -bottom-2 right-4 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-[#20232B]" />
+        </div>
+      )}
+
+      {/* Main button */}
+      <button
+        onClick={onClick}
+        aria-label="Open ScamShield AI Assistant"
+        className="relative w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 shadow-[0_4px_24px_rgba(245,158,11,0.55)] hover:shadow-[0_6px_36px_rgba(245,158,11,0.75)] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center"
+      >
+        <BotAvatar size={42} />
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center shadow-md">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+        {/* Pulse ring */}
+        <span className="absolute inset-0 rounded-full bg-amber-400/30 animate-ping" style={{ animationDuration: '2.5s' }} />
+      </button>
+    </div>
+  );
 }
 
 // ── Main component ────────────────────────────────────────────────────────
@@ -75,42 +149,41 @@ export function ChatWidget() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showBubble, setShowBubble] = useState(false);
 
-  // Voice input state
+  // Voice
   const [isRecording, setIsRecording] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
   const [micError, setMicError] = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
-
-  // Voice output state
   const [speakingId, setSpeakingId] = useState<number | null>(null);
   const [ttsSupported, setTtsSupported] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // ── Check browser capabilities ──────────────────────────────────────────
   useEffect(() => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     setVoiceSupported(!!SR);
     setTtsSupported('speechSynthesis' in window);
+    // Show speech bubble after 3 seconds
+    const t = setTimeout(() => setShowBubble(true), 3000);
+    const t2 = setTimeout(() => setShowBubble(false), 8000);
+    return () => { clearTimeout(t); clearTimeout(t2); };
   }, []);
 
-  // ── Auto-scroll ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (isOpen && !isMinimized) {
       setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
     }
   }, [messages, loading, isOpen, isMinimized]);
 
-  // ── Focus input when opened ─────────────────────────────────────────────
   useEffect(() => {
     if (isOpen && !isMinimized) {
-      setTimeout(() => inputRef.current?.focus(), 100);
+      setTimeout(() => inputRef.current?.focus(), 150);
     }
   }, [isOpen, isMinimized]);
 
-  // ── Unread counter ──────────────────────────────────────────────────────
   useEffect(() => {
     if (!isOpen || isMinimized) {
       const lastMsg = messages[messages.length - 1];
@@ -120,257 +193,175 @@ export function ChatWidget() {
     }
   }, [messages]);
 
-  const openChat = () => {
-    setIsOpen(true);
-    setIsMinimized(false);
-    setUnreadCount(0);
-  };
+  const openChat = () => { setIsOpen(true); setIsMinimized(false); setUnreadCount(0); setShowBubble(false); };
+  const closeChat = () => { setIsOpen(false); stopSpeaking(); };
+  const minimizeChat = () => { setIsMinimized(true); stopSpeaking(); };
 
-  // ── Stop TTS if window closes ───────────────────────────────────────────
-  const closeChat = () => {
-    setIsOpen(false);
-    stopSpeaking();
-  };
-
-  const minimizeChat = () => {
-    setIsMinimized(true);
-    stopSpeaking();
-  };
-
-  // ── Convert display history to API format ───────────────────────────────
   function buildHistory(): ChatMessage[] {
     return messages
-      .filter(m => m.text !== WELCOME.text) // exclude welcome
-      .map(m => ({
-        role: m.role === 'user' ? 'user' : 'model' as 'user' | 'model',
-        text: m.text,
-      }));
+      .filter(m => m.text !== WELCOME.text)
+      .map(m => ({ role: m.role === 'user' ? 'user' : 'model' as 'user' | 'model', text: m.text }));
   }
 
-  // ── Send a message ──────────────────────────────────────────────────────
   const send = useCallback(async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
-
     const userMsg: DisplayMessage = { role: 'user', text: trimmed, timestamp: Date.now() };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setLoading(true);
-
     try {
-      const history = buildHistory();
-      const { reply, isEmergency } = await sendChatMessage(trimmed, history);
-      const assistantMsg: DisplayMessage = {
-        role: 'assistant',
-        text: reply,
-        timestamp: Date.now(),
-        isEmergency,
-      };
-      setMessages(prev => [...prev, assistantMsg]);
+      const { reply, isEmergency } = await sendChatMessage(trimmed, buildHistory());
+      setMessages(prev => [...prev, { role: 'assistant', text: reply, timestamp: Date.now(), isEmergency }]);
     } catch (err) {
-      const errorMsg: DisplayMessage = {
+      setMessages(prev => [...prev, {
         role: 'assistant',
         text: err instanceof Error && err.message.includes('429')
-          ? 'You\'ve sent a lot of messages! Please wait a moment before continuing.'
-          : 'I\'m having trouble connecting right now. If this is urgent, please call 1930 (Cybercrime Helpline). Please try again in a moment.',
+          ? "Whoa, slow down! 😅 You're sending messages really fast. Give me a moment!"
+          : "Oops! 😔 I'm having a little trouble connecting. If it's urgent, call 1930. Try again in a moment!",
         timestamp: Date.now(),
-      };
-      setMessages(prev => [...prev, errorMsg]);
+      }]);
     } finally {
       setLoading(false);
     }
   }, [loading, messages]);
 
-  // ── Voice INPUT (Speech Recognition) ───────────────────────────────────
   const startRecording = useCallback(() => {
     if (!voiceSupported) return;
     setMicError(null);
-
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SR();
     recognition.lang = 'en-IN';
     recognition.continuous = false;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
-
     recognition.onstart = () => setIsRecording(true);
-
     recognition.onresult = (event: SpeechRecognitionEvent) => {
-      const transcript = Array.from(event.results)
-        .map(r => r[0].transcript)
-        .join('');
+      const transcript = Array.from(event.results).map(r => r[0].transcript).join('');
       setInput(transcript);
-
-      // Auto-send on final result
-      if (event.results[event.results.length - 1].isFinal) {
-        void send(transcript);
-      }
+      if (event.results[event.results.length - 1].isFinal) void send(transcript);
     };
-
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       setIsRecording(false);
-      if (event.error === 'not-allowed') {
-        setMicError('Microphone access denied. Please allow microphone permissions in your browser settings.');
-      } else if (event.error === 'no-speech') {
-        setMicError('No speech detected. Please try again.');
-      } else {
-        setMicError('Voice input failed. Please type your message instead.');
-      }
+      if (event.error === 'not-allowed') setMicError('Microphone access denied. Allow it in browser settings.');
+      else if (event.error === 'no-speech') setMicError('No speech detected. Try again!');
+      else setMicError('Voice failed. Please type instead.');
       setTimeout(() => setMicError(null), 4000);
     };
-
     recognition.onend = () => setIsRecording(false);
-
     recognitionRef.current = recognition;
     recognition.start();
   }, [voiceSupported, send]);
 
-  const stopRecording = useCallback(() => {
-    recognitionRef.current?.stop();
-    setIsRecording(false);
-  }, []);
+  const stopRecording = useCallback(() => { recognitionRef.current?.stop(); setIsRecording(false); }, []);
 
-  // ── Voice OUTPUT (Text-to-Speech) ────────────────────────────────────────
   const speak = useCallback((text: string, id: number) => {
     if (!ttsSupported) return;
     window.speechSynthesis.cancel();
-
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-IN';
     utterance.rate = 0.95;
     utterance.pitch = 1.0;
-    utterance.volume = 1.0;
-
-    // Prefer a natural-sounding voice
     const voices = window.speechSynthesis.getVoices();
-    const preferred = voices.find(v =>
-      v.lang.startsWith('en') && (v.name.includes('Google') || v.name.includes('Natural'))
-    ) || voices.find(v => v.lang.startsWith('en'));
+    const preferred = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Google') || v.name.includes('Natural'))) || voices.find(v => v.lang.startsWith('en'));
     if (preferred) utterance.voice = preferred;
-
     utterance.onstart = () => setSpeakingId(id);
     utterance.onend = () => setSpeakingId(null);
     utterance.onerror = () => setSpeakingId(null);
-
     window.speechSynthesis.speak(utterance);
   }, [ttsSupported]);
 
-  const stopSpeaking = useCallback(() => {
-    window.speechSynthesis?.cancel();
-    setSpeakingId(null);
-  }, []);
+  const stopSpeaking = useCallback(() => { window.speechSynthesis?.cancel(); setSpeakingId(null); }, []);
 
-  const clearChat = () => {
-    stopSpeaking();
-    setMessages([WELCOME]);
-    setInput('');
-  };
+  const clearChat = () => { stopSpeaking(); setMessages([WELCOME]); setInput(''); };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      void send(input);
-    }
-  };
-
-  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <>
-      {/* ── Floating trigger button ── */}
+      {/* ── Floating trigger ── */}
       {!isOpen && (
-        <button
-          onClick={openChat}
-          aria-label="Open ScamShield AI Assistant"
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-amber-500 to-amber-400 shadow-[0_4px_24px_rgba(245,158,11,0.5)] hover:shadow-[0_6px_32px_rgba(245,158,11,0.65)] hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center group"
-        >
-          <Bot className="w-7 h-7 text-[#111318]" />
-          {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </span>
-          )}
-        </button>
+        <FloatingTrigger onClick={openChat} unreadCount={unreadCount} showBubble={showBubble} />
       )}
 
       {/* ── Chat window ── */}
       {isOpen && (
         <div
-          className={`fixed bottom-6 right-6 z-50 w-[360px] sm:w-[400px] bg-[#171A21] border border-amber-500/20 rounded-2xl shadow-[0_8px_48px_rgba(0,0,0,0.6),0_0_0_1px_rgba(245,158,11,0.1)] flex flex-col transition-all duration-300 ${
-            isMinimized ? 'h-14' : 'h-[580px] max-h-[90vh]'
+          className={`fixed bottom-6 right-6 z-50 w-[360px] sm:w-[400px] flex flex-col rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_0_1px_rgba(245,158,11,0.15)] transition-all duration-300 ${
+            isMinimized ? 'h-16' : 'h-[600px] max-h-[92vh]'
           }`}
+          style={{ background: 'linear-gradient(160deg, #1a1d26 0%, #171A21 100%)' }}
           role="dialog"
           aria-label="ScamShield AI Assistant"
         >
+          {/* ── Gradient top bar ── */}
+          <div className="h-1 w-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 shrink-0" />
+
           {/* ── Header ── */}
-          <div className="flex items-center gap-3 px-4 h-14 border-b border-amber-500/10 shrink-0">
-            <div className="w-8 h-8 rounded-full bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0">
-              <Bot className="w-4 h-4 text-amber-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-bold text-[#F8FAFC] truncate">ScamShield AI Assistant</div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                <span className="text-[10px] text-[#9CA3AF]">Online — Ask me anything</span>
+          <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5 shrink-0"
+            style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.08) 0%, transparent 100%)' }}
+          >
+            {/* Avatar with glow */}
+            <div className="relative shrink-0">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-[0_0_16px_rgba(245,158,11,0.5)]">
+                <BotAvatar size={28} />
               </div>
+              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 border-2 border-[#171A21]" />
             </div>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm font-bold text-[#F8FAFC]">Shieldy</span>
+                <Sparkles className="w-3 h-3 text-amber-400" />
+              </div>
+              <div className="text-[10px] text-[#9CA3AF]">ScamShield AI · Always here to help</div>
+            </div>
+
             <div className="flex items-center gap-1 shrink-0">
-              <button
-                onClick={clearChat}
-                aria-label="Clear chat"
-                title="Clear chat"
-                className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#F8FAFC] hover:bg-white/5 transition-colors"
-              >
+              <button onClick={clearChat} title="Clear chat"
+                className="p-1.5 rounded-lg text-[#6B7280] hover:text-[#F8FAFC] hover:bg-white/5 transition-colors">
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
-              <button
-                onClick={minimizeChat}
-                aria-label="Minimize chat"
-                className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#F8FAFC] hover:bg-white/5 transition-colors"
-              >
+              <button onClick={minimizeChat} aria-label="Minimize"
+                className="p-1.5 rounded-lg text-[#6B7280] hover:text-[#F8FAFC] hover:bg-white/5 transition-colors">
                 <Minimize2 className="w-3.5 h-3.5" />
               </button>
-              <button
-                onClick={closeChat}
-                aria-label="Close chat"
-                className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-red-400 hover:bg-red-500/10 transition-colors"
-              >
+              <button onClick={closeChat} aria-label="Close"
+                className="p-1.5 rounded-lg text-[#6B7280] hover:text-red-400 hover:bg-red-500/10 transition-colors">
                 <X className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
-          {/* ── Minimized restore bar ── */}
+          {/* ── Minimized bar ── */}
           {isMinimized && (
-            <button
-              onClick={() => { setIsMinimized(false); setUnreadCount(0); }}
-              className="flex-1 flex items-center justify-center gap-2 text-sm text-amber-400 hover:text-amber-300 transition-colors"
-            >
+            <button onClick={() => { setIsMinimized(false); setUnreadCount(0); }}
+              className="flex-1 flex items-center justify-center gap-2 text-sm text-amber-400 hover:text-amber-300 transition-colors">
               <ChevronDown className="w-4 h-4 rotate-180" />
-              <span>Open chat</span>
+              <span>Chat with Shieldy</span>
               {unreadCount > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-bold">
-                  {unreadCount}
-                </span>
+                <span className="px-1.5 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-bold">{unreadCount}</span>
               )}
             </button>
           )}
 
           {!isMinimized && (
             <>
-              {/* ── Messages area ── */}
+              {/* ── Messages ── */}
               <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scrollbar-thin">
 
-                {/* Suggested prompts — only when at welcome state */}
+                {/* Intro card — show only on welcome */}
                 {messages.length === 1 && (
-                  <div className="space-y-2">
-                    <p className="text-[10px] text-[#9CA3AF] uppercase tracking-wider font-semibold">Quick questions</p>
-                    <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-col items-center text-center py-4 space-y-3">
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400/20 to-amber-600/10 border border-amber-500/20 flex items-center justify-center shadow-[0_0_24px_rgba(245,158,11,0.2)]">
+                      <BotAvatar size={52} animate />
+                    </div>
+                    <div>
+                      <p className="text-base font-bold text-[#F8FAFC]">Hi, I'm Shieldy! 👋</p>
+                      <p className="text-xs text-[#9CA3AF] mt-1">Your AI scam protection buddy</p>
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-1.5 mt-2">
                       {SUGGESTED_PROMPTS.map(p => (
-                        <button
-                          key={p}
-                          onClick={() => void send(p)}
-                          className="px-2.5 py-1.5 rounded-full border border-amber-500/20 text-[11px] text-amber-400 hover:bg-amber-500/10 hover:border-amber-500/40 transition-colors text-left"
-                        >
+                        <button key={p} onClick={() => void send(p.replace(/^[^\s]+\s/, ''))}
+                          className="px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-400 hover:bg-amber-500/20 hover:border-amber-500/40 transition-all">
                           {p}
                         </button>
                       ))}
@@ -381,65 +372,44 @@ export function ChatWidget() {
                 {/* Messages */}
                 {messages.map((msg, i) => (
                   <div key={i} className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    {/* Bot avatar */}
                     {msg.role === 'assistant' && (
-                      <div className="w-7 h-7 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                        <Bot className="w-3.5 h-3.5 text-amber-400" />
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shrink-0 mt-0.5 shadow-[0_0_10px_rgba(245,158,11,0.3)]">
+                        <BotAvatar size={22} />
                       </div>
                     )}
 
-                    <div className="max-w-[82%] space-y-1">
-                      {/* Emergency banner */}
+                    <div className="max-w-[80%] space-y-1">
                       {msg.isEmergency && (
-                        <a
-                          href="tel:1930"
-                          className="flex items-center gap-2 px-3 py-2 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-bold hover:bg-red-500/25 transition-colors"
-                        >
+                        <a href="tel:1930"
+                          className="flex items-center gap-2 px-3 py-2 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-bold hover:bg-red-500/25 transition-colors">
                           <Phone className="w-3.5 h-3.5 shrink-0" />
                           🚨 Call 1930 — Cybercrime Helpline (24×7)
                         </a>
                       )}
 
-                      {/* Message bubble */}
-                      <div
-                        className={`px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
-                          msg.role === 'user'
-                            ? 'bg-amber-500 text-[#111318] font-medium rounded-br-sm'
-                            : 'bg-[#20232B] text-[#D1D5DB] rounded-bl-sm border border-amber-500/8'
-                        }`}
-                      >
+                      <div className={`px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
+                        msg.role === 'user'
+                          ? 'bg-gradient-to-br from-amber-500 to-amber-400 text-[#111318] font-medium rounded-2xl rounded-br-sm shadow-[0_2px_12px_rgba(245,158,11,0.3)]'
+                          : 'bg-[#20232B] text-[#D1D5DB] rounded-2xl rounded-bl-sm border border-white/5'
+                      }`}>
                         {msg.text}
                       </div>
 
-                      {/* Message footer */}
                       <div className={`flex items-center gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <span className="text-[10px] text-[#4B5563]">{formatTime(msg.timestamp)}</span>
-
-                        {/* TTS button — only on assistant messages */}
+                        <span className="text-[10px] text-[#374151]">{formatTime(msg.timestamp)}</span>
                         {msg.role === 'assistant' && ttsSupported && (
                           <button
-                            onClick={() =>
-                              speakingId === msg.timestamp
-                                ? stopSpeaking()
-                                : speak(msg.text, msg.timestamp)
-                            }
-                            aria-label={speakingId === msg.timestamp ? 'Stop speaking' : 'Read aloud'}
-                            className="p-1 rounded text-[#4B5563] hover:text-amber-400 transition-colors"
-                          >
-                            {speakingId === msg.timestamp ? (
-                              <VolumeX className="w-3 h-3" />
-                            ) : (
-                              <Volume2 className="w-3 h-3" />
-                            )}
+                            onClick={() => speakingId === msg.timestamp ? stopSpeaking() : speak(msg.text, msg.timestamp)}
+                            className="p-1 rounded text-[#374151] hover:text-amber-400 transition-colors">
+                            {speakingId === msg.timestamp ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
                           </button>
                         )}
                       </div>
                     </div>
 
-                    {/* User avatar */}
                     {msg.role === 'user' && (
-                      <div className="w-7 h-7 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center shrink-0 mt-0.5 text-amber-400 font-bold text-xs">
-                        U
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500/20 to-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0 mt-0.5 text-amber-400 font-bold text-xs">
+                        You
                       </div>
                     )}
                   </div>
@@ -448,14 +418,15 @@ export function ChatWidget() {
                 {/* Typing indicator */}
                 {loading && (
                   <div className="flex gap-2 justify-start">
-                    <div className="w-7 h-7 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
-                      <Bot className="w-3.5 h-3.5 text-amber-400" />
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shrink-0">
+                      <BotAvatar size={22} />
                     </div>
-                    <div className="px-4 py-3 rounded-2xl rounded-bl-sm bg-[#20232B] border border-amber-500/8">
-                      <div className="flex gap-1 items-center">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                    <div className="px-4 py-3 rounded-2xl rounded-bl-sm bg-[#20232B] border border-white/5">
+                      <div className="flex gap-1.5 items-center">
+                        {[0, 150, 300].map(delay => (
+                          <span key={delay} className="w-2 h-2 rounded-full bg-amber-400 animate-bounce"
+                            style={{ animationDelay: `${delay}ms` }} />
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -464,72 +435,58 @@ export function ChatWidget() {
                 <div ref={bottomRef} />
               </div>
 
-              {/* ── Mic error ── */}
+              {/* Errors */}
               {micError && (
                 <div className="mx-4 mb-2 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
                   {micError}
                 </div>
               )}
 
-              {/* ── Recording indicator ── */}
               {isRecording && (
                 <div className="mx-4 mb-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
-                  <span className="text-amber-400 text-xs font-medium">Listening... Speak now</span>
+                  <span className="text-amber-400 text-xs font-medium">Shieldy is listening... 🎙️</span>
                 </div>
               )}
 
-              {/* ── Safety notice ── */}
-              <div className="mx-4 mb-2 flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-amber-500/5">
-                <ShieldCheck className="w-3 h-3 text-amber-500/60 shrink-0" />
-                <span className="text-[10px] text-[#4B5563]">Never share OTPs, passwords, or banking details</span>
+              {/* Safety notice */}
+              <div className="mx-4 mb-2 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/5 border border-amber-500/10">
+                <ShieldCheck className="w-3 h-3 text-amber-500/50 shrink-0" />
+                <span className="text-[10px] text-[#4B5563]">Never share OTPs, passwords or banking details</span>
               </div>
 
-              {/* ── Input area ── */}
+              {/* Input */}
               <div className="px-4 pb-4 shrink-0">
-                <div className="flex items-center gap-2 bg-[#20232B] border border-amber-500/15 rounded-xl px-3 py-2 focus-within:border-amber-500/40 transition-colors">
+                <div className="flex items-center gap-2 bg-[#20232B] border border-white/8 rounded-2xl px-3 py-2.5 focus-within:border-amber-500/40 focus-within:shadow-[0_0_0_3px_rgba(245,158,11,0.08)] transition-all">
                   <input
                     ref={inputRef}
                     type="text"
                     value={input}
                     onChange={e => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder={isRecording ? 'Listening...' : 'Type or speak your message...'}
+                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void send(input); } }}
+                    placeholder={isRecording ? '🎙️ Listening...' : 'Ask Shieldy anything...'}
                     disabled={loading || isRecording}
-                    aria-label="Chat message input"
-                    className="flex-1 bg-transparent text-sm text-[#F8FAFC] placeholder:text-[#4B5563] focus:outline-none disabled:opacity-50 min-w-0"
+                    className="flex-1 bg-transparent text-sm text-[#F8FAFC] placeholder:text-[#374151] focus:outline-none disabled:opacity-50 min-w-0"
                   />
 
-                  {/* Mic button — always show, with fallback message for unsupported browsers */}
                   <button
-                    onClick={
-                      !voiceSupported
-                        ? () => setMicError('Voice input requires Chrome or Edge browser.')
-                        : isRecording
-                        ? stopRecording
-                        : startRecording
-                    }
+                    onClick={!voiceSupported ? () => setMicError('Voice needs Chrome or Edge.') : isRecording ? stopRecording : startRecording}
                     disabled={loading}
-                    aria-label={isRecording ? 'Stop recording' : 'Start voice input'}
-                    title={!voiceSupported ? 'Voice input requires Chrome or Edge' : isRecording ? 'Stop recording' : 'Voice input'}
-                    className={`p-1.5 rounded-lg transition-all ${
+                    title={!voiceSupported ? 'Needs Chrome/Edge' : isRecording ? 'Stop' : 'Voice input'}
+                    className={`p-2 rounded-xl transition-all ${
                       isRecording
-                        ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30 animate-pulse'
+                        ? 'bg-red-500/20 text-red-400 animate-pulse'
                         : !voiceSupported
-                        ? 'text-[#4B5563] cursor-not-allowed'
-                        : 'text-[#9CA3AF] hover:text-amber-400 hover:bg-amber-500/10'
-                    }`}
-                  >
+                        ? 'text-[#374151] cursor-not-allowed'
+                        : 'text-[#6B7280] hover:text-amber-400 hover:bg-amber-500/10'
+                    }`}>
                     {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
                   </button>
 
-                  {/* Send button */}
                   <button
                     onClick={() => void send(input)}
                     disabled={loading || !input.trim()}
-                    aria-label="Send message"
-                    className="p-1.5 rounded-lg bg-amber-500 text-[#111318] hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
-                  >
+                    className="p-2 rounded-xl bg-gradient-to-br from-amber-500 to-amber-400 text-[#111318] hover:from-amber-400 hover:to-amber-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 shadow-[0_2px_8px_rgba(245,158,11,0.4)]">
                     <Send className="w-4 h-4" />
                   </button>
                 </div>
