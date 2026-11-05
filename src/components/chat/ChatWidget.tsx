@@ -72,34 +72,53 @@ function BotAvatar({ size = 32, animate = false }: { size?: number; animate?: bo
       className={animate ? 'animate-bounce' : ''}
       style={animate ? { animationDuration: '2s' } : {}}
     >
-      {/* Body */}
-      <rect x="12" y="20" width="40" height="32" rx="12" fill="#F59E0B" />
-      {/* Head */}
-      <rect x="16" y="8" width="32" height="26" rx="10" fill="#FBBF24" />
+      {/* Body — dark graphite */}
+      <rect x="10" y="28" width="44" height="28" rx="14" fill="#1E2130" />
+      {/* Body highlight */}
+      <rect x="10" y="28" width="44" height="14" rx="14" fill="#272B3A" />
+
+      {/* Head — dark with amber border */}
+      <rect x="14" y="6" width="36" height="30" rx="12" fill="#272B3A" />
+      <rect x="14" y="6" width="36" height="30" rx="12" stroke="#F59E0B" strokeWidth="1.5" />
+
       {/* Antenna */}
-      <line x1="32" y1="8" x2="32" y2="2" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" />
-      <circle cx="32" cy="2" r="2.5" fill="#F59E0B" />
-      {/* Eyes */}
-      <circle cx="24" cy="19" r="4" fill="white" />
-      <circle cx="40" cy="19" r="4" fill="white" />
-      <circle cx="25" cy="20" r="2" fill="#111318" />
-      <circle cx="41" cy="20" r="2" fill="#111318" />
+      <line x1="32" y1="6" x2="32" y2="1" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="32" cy="1" r="2" fill="#F59E0B" />
+
+      {/* Eyes — white with colored pupils */}
+      <circle cx="23" cy="18" r="5" fill="white" />
+      <circle cx="41" cy="18" r="5" fill="white" />
+      {/* Pupils — dark */}
+      <circle cx="24" cy="19" r="2.8" fill="#111318" />
+      <circle cx="42" cy="19" r="2.8" fill="#111318" />
       {/* Eye shine */}
-      <circle cx="26" cy="19" r="0.8" fill="white" />
-      <circle cx="42" cy="19" r="0.8" fill="white" />
-      {/* Smile */}
-      <path d="M24 27 Q32 33 40 27" stroke="#111318" strokeWidth="2" strokeLinecap="round" fill="none" />
-      {/* Cheeks */}
-      <circle cx="20" cy="26" r="3" fill="#FDE68A" opacity="0.6" />
-      <circle cx="44" cy="26" r="3" fill="#FDE68A" opacity="0.6" />
+      <circle cx="25" cy="18" r="1" fill="white" />
+      <circle cx="43" cy="18" r="1" fill="white" />
+      {/* Eye glow ring */}
+      <circle cx="23" cy="18" r="5" stroke="#F59E0B" strokeWidth="0.8" strokeOpacity="0.4" />
+      <circle cx="41" cy="18" r="5" stroke="#F59E0B" strokeWidth="0.8" strokeOpacity="0.4" />
+
+      {/* Smile — amber */}
+      <path d="M22 26 Q32 32 42 26" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+
+      {/* Cheeks — pink blush */}
+      <ellipse cx="17" cy="25" rx="3.5" ry="2" fill="#F87171" opacity="0.5" />
+      <ellipse cx="47" cy="25" rx="3.5" ry="2" fill="#F87171" opacity="0.5" />
+
       {/* Arms */}
-      <rect x="4" y="24" width="10" height="6" rx="3" fill="#FBBF24" />
-      <rect x="50" y="24" width="10" height="6" rx="3" fill="#FBBF24" />
-      {/* Belly screen */}
-      <rect x="20" y="34" width="24" height="12" rx="6" fill="#111318" opacity="0.2" />
-      <circle cx="28" cy="40" r="2" fill="#34D399" />
-      <circle cx="32" cy="40" r="2" fill="#F59E0B" />
-      <circle cx="36" cy="40" r="2" fill="#F87171" />
+      <rect x="2" y="30" width="10" height="7" rx="3.5" fill="#272B3A" stroke="#F59E0B" strokeWidth="1" />
+      <rect x="52" y="30" width="10" height="7" rx="3.5" fill="#272B3A" stroke="#F59E0B" strokeWidth="1" />
+
+      {/* Belly panel */}
+      <rect x="18" y="36" width="28" height="14" rx="7" fill="#111318" />
+      {/* Status dots */}
+      <circle cx="26" cy="43" r="2.5" fill="#34D399" />
+      <circle cx="32" cy="43" r="2.5" fill="#F59E0B" />
+      <circle cx="38" cy="43" r="2.5" fill="#60A5FA" />
+
+      {/* Ears / side bolts */}
+      <circle cx="14" cy="21" r="2" fill="#F59E0B" />
+      <circle cx="50" cy="21" r="2" fill="#F59E0B" />
     </svg>
   );
 }
@@ -126,16 +145,16 @@ function FloatingTrigger({ onClick, unreadCount, showBubble }: {
       <button
         onClick={onClick}
         aria-label="Open ScamShield AI Assistant"
-        className="relative w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 shadow-[0_4px_24px_rgba(245,158,11,0.55)] hover:shadow-[0_6px_36px_rgba(245,158,11,0.75)] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center"
+        className="relative w-16 h-16 rounded-full bg-[#1E2130] border-2 border-amber-500/60 shadow-[0_4px_24px_rgba(245,158,11,0.4)] hover:shadow-[0_6px_36px_rgba(245,158,11,0.65)] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center"
       >
-        <BotAvatar size={42} />
+        <BotAvatar size={44} />
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center shadow-md">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
         {/* Pulse ring */}
-        <span className="absolute inset-0 rounded-full bg-amber-400/30 animate-ping" style={{ animationDuration: '2.5s' }} />
+        <span className="absolute inset-0 rounded-full border-2 border-amber-500/40 animate-ping" style={{ animationDuration: '2.5s' }} />
       </button>
     </div>
   );
@@ -301,7 +320,7 @@ export function ChatWidget() {
           >
             {/* Avatar with glow */}
             <div className="relative shrink-0">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-[0_0_16px_rgba(245,158,11,0.5)]">
+              <div className="w-10 h-10 rounded-full bg-[#1E2130] border border-amber-500/40 flex items-center justify-center shadow-[0_0_16px_rgba(245,158,11,0.3)]">
                 <BotAvatar size={28} />
               </div>
               <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 border-2 border-[#171A21]" />
@@ -351,8 +370,8 @@ export function ChatWidget() {
                 {/* Intro card — show only on welcome */}
                 {messages.length === 1 && (
                   <div className="flex flex-col items-center text-center py-4 space-y-3">
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400/20 to-amber-600/10 border border-amber-500/20 flex items-center justify-center shadow-[0_0_24px_rgba(245,158,11,0.2)]">
-                      <BotAvatar size={52} animate />
+                    <div className="w-20 h-20 rounded-full bg-[#1E2130] border-2 border-amber-500/40 flex items-center justify-center shadow-[0_0_24px_rgba(245,158,11,0.25)]">
+                      <BotAvatar size={56} animate />
                     </div>
                     <div>
                       <p className="text-base font-bold text-[#F8FAFC]">Hi, I'm Shieldy! 👋</p>
@@ -418,7 +437,7 @@ export function ChatWidget() {
                 {/* Typing indicator */}
                 {loading && (
                   <div className="flex gap-2 justify-start">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-[#1E2130] border border-amber-500/30 flex items-center justify-center shrink-0">
                       <BotAvatar size={22} />
                     </div>
                     <div className="px-4 py-3 rounded-2xl rounded-bl-sm bg-[#20232B] border border-white/5">
